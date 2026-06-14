@@ -1,5 +1,4 @@
-// backend/src/services/balance.service.js
-import { Expense, ExpenseSplit, Settlement, User } from "../models/index.js";
+import { Expense, ExpenseSplit, Settlement, User } from "../model/index.js";
 import { Op } from "sequelize";
 
 class BalanceService {

@@ -1,5 +1,4 @@
-// backend/src/services/settlement.service.js
-import { Settlement, User } from "../models/index.js";
+import { Settlement, User } from "../model/index.js";
 import balanceService from "./balance.service.js";
 
 class SettlementService {

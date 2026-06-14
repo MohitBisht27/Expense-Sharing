@@ -8,7 +8,7 @@ import {
   User,
   Group,
   GroupMember,
-} from "../models/index.js";
+} from "../model/index.js";
 import {
   SPLIT_TYPES,
   CURRENCIES,

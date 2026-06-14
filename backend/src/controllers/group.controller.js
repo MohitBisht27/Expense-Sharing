@@ -2,7 +2,7 @@ import { Op } from "sequelize";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { Group, GroupMember, User, Expense } from "../models/index.js";
+import { Group, GroupMember, User, Expense } from "../model/index.js";
 
 export const createGroup = asyncHandler(async (req, res) => {
   const { name, description, memberIds } = req.body;

@@ -1,7 +1,6 @@
-// backend/src/services/import.service.js
 import csv from "csv-parser";
 import streamifier from "streamifier";
-import { Expense, ExpenseSplit, User, GroupMember } from "../models/index.js";
+import { Expense, ExpenseSplit, User, GroupMember } from "../model/index.js";
 import {
   ANOMALY_TYPES,
   ANOMALY_ACTIONS,

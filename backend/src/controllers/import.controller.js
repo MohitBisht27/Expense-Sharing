@@ -2,7 +2,7 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import ImportService from "../services/import.service.js";
-import { ImportLog, GroupMember } from "../models/index.js";
+import { ImportLog, GroupMember } from "../model/index.js";
 
 export const importCSV = asyncHandler(async (req, res) => {
   const { groupId } = req.params;

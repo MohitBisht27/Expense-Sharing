@@ -1,8 +1,9 @@
 import jwt from "jsonwebtoken";
+import { Op } from "sequelize";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { User } from "../models/index.js";
+import { User } from "../model/index.js";
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {

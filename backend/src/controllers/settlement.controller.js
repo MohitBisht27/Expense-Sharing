@@ -3,7 +3,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import settlementService from "../services/settlement.service.js";
 import balanceService from "../services/balance.service.js";
-import { GroupMember } from "../models/index.js";
+import { GroupMember } from "../model/index.js";
 
 export const createSettlement = asyncHandler(async (req, res) => {
   const { groupId, paidTo, amount, notes } = req.body;
