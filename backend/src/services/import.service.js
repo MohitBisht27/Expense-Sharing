@@ -193,7 +193,7 @@ class ImportService {
       }
 
       // Check split participants in memberMap
-      const participants = this.parseParticipants(row.SplitWith);
+      const participants = this.parseParticipants(row.SplitWith, row.SplitDetails);
       participants.forEach((p) => {
         if (!memberMap[p.name.toLowerCase()]) {
           anomaliesForRow.push({
@@ -241,7 +241,7 @@ class ImportService {
     const amount = parseFloat(row.Amount);
 
     if (splitType === "PERCENTAGE") {
-      const participants = this.parseParticipants(row.SplitWith);
+      const participants = this.parseParticipants(row.SplitWith, row.SplitDetails);
       let totalPercentage = 0;
 
       participants.forEach((p) => {
@@ -258,7 +258,7 @@ class ImportService {
     }
 
     if (splitType === "EXACT") {
-      const participants = this.parseParticipants(row.SplitWith);
+      const participants = this.parseParticipants(row.SplitWith, row.SplitDetails);
       let totalAmount = 0;
 
       participants.forEach((p) => {
@@ -277,18 +277,32 @@ class ImportService {
     return null;
   }
 
-  parseParticipants(splitWith) {
+  parseParticipants(splitWith, splitDetails) {
     if (!splitWith) return [];
 
     const participants = [];
-    const parts = splitWith.split(",");
+    const parts = splitWith.split(/[;,]/);
 
     parts.forEach((part) => {
       const match = part.match(/([^:]+):?(\d+\.?\d*)?/);
       if (match) {
+        const name = match[1].trim();
+        let value = match[2] ? parseFloat(match[2]) : null;
+        
+        if (value === null && splitDetails) {
+          const detailParts = splitDetails.split(/[;,]/);
+          const detail = detailParts.find(d => d.toLowerCase().includes(name.toLowerCase()));
+          if (detail) {
+            const detailMatch = detail.match(/(\d+\.?\d*)/);
+            if (detailMatch) {
+              value = parseFloat(detailMatch[1]);
+            }
+          }
+        }
+        
         participants.push({
-          name: match[1].trim(),
-          value: match[2] ? parseFloat(match[2]) : null,
+          name,
+          value,
         });
       }
     });
@@ -341,7 +355,7 @@ class ImportService {
         );
 
         // Create splits
-        let participants = this.parseParticipants(row.SplitWith);
+        let participants = this.parseParticipants(row.SplitWith, row.SplitDetails);
         if (participants.length === 0 && splitType === "EQUAL") {
           participants = Object.keys(memberMap).map((name) => ({
             name,

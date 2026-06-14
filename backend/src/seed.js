@@ -109,8 +109,8 @@ const seedDatabase = async () => {
 08-03-2026,Goa flights,Aisha,32400,INR,equal,Aisha;Rohan;Priya;Dev,,trip starts!
 09-03-2026,Goa villa booking,Dev,540,USD,equal,Aisha;Rohan;Priya;Dev,,booked on intl site
 10-03-2026,Beach shack lunch,Rohan,84,USD,equal,Aisha;Rohan;Priya;Dev,,
-10-03-2026,Scooter rentals,Priya,3600,INR,share,Aisha;Rohan;Priya;Dev,Aisha 1; Rohan 2; Priya 1; Dev 2,Rohan and Dev took the bigger ones
-11-03-2026,Parasailing,Dev,150,USD,Aisha;Rohan;Priya;Dev,,Kabir joined for the day
+10-03-2026,Scooter rentals,Priya,3600,INR,shares,Aisha;Rohan;Priya;Dev,Aisha 1; Rohan 2; Priya 1; Dev 2,Rohan and Dev took the bigger ones
+11-03-2026,Parasailing,Dev,150,USD,equal,Aisha;Rohan;Priya;Dev,,Kabir joined for the day
 11-03-2026,Dinner at Thalassa,Aisha,2400,INR,equal,Aisha;Rohan;Priya;Dev,,
 11-03-2026,Thalassa dinner,Rohan,2450,INR,equal,Aisha;Rohan;Priya;Dev,,Aisha also logged this I think hers is wrong
 12-03-2026,Parasailing refund,Dev,-30,USD,equal,Aisha;Rohan;Priya;Dev,,one slot got cancelled
@@ -122,14 +122,14 @@ const seedDatabase = async () => {
 25-03-2026,Weekend brunch,Meera,2200,INR,percentage,Aisha;Rohan;Priya;Meera,Aisha 20%; Rohan 30%; Priya 30%; Meera 20%,
 28-03-2026,Meera farewell dinner,Aisha,4800,INR,equal,Aisha;Rohan;Priya;Meera,,Meera moving out Sunday :(
 04-05-2026,Deep cleaning service,Rohan,2500,INR,equal,Aisha;Rohan;Priya,,is this April 5 or May 4? format is a mess
-01-04-2026,April rent,Aisha,48000,INR,share,Aisha;Rohan;Priya,Aisha 2; Rohan 1; Priya 1,Aisha took Meera's room too
+01-04-2026,April rent,Aisha,48000,INR,shares,Aisha;Rohan;Priya,Aisha 2; Rohan 1; Priya 1,Aisha took Meera's room too
 02-04-2026,Groceries BigBasket,Priya,2640,INR,equal,Aisha;Rohan;Priya;Meera,,oops Meera still in the group list
 05-04-2026,Wifi bill Apr,Rohan,1199,INR,equal,Aisha;Rohan;Priya,,
 08-04-2026,Sam deposit share,Sam,15000,INR,equal,Aisha,,Sam moving in! paid Aisha his deposit
 10-04-2026,Housewarming drinks,Sam,3100,INR,equal,Aisha;Rohan;Priya;Sam,,
 12-04-2026,Electricity Apr,Aisha,1380,INR,equal,Aisha;Rohan;Priya;Sam,,
 15-04-2026,Groceries DMart,Sam,1990,INR,equal,Aisha;Rohan;Priya;Sam,,
-18-04-2026,Furniture for common room,Aisha,12000,INR,equal,Aisha;Rohan;Priya;Sam,,Aisha 1 part; Priya 1 part,someone added shares anyway
+18-04-2026,Furniture for common room,Aisha,12000,INR,equal,Aisha;Rohan;Priya;Sam,,Aisha 1 part; Priya 1 part - someone added shares anyway
 20-04-2026,Maid salary Apr,Priya,3000,INR,equal,Aisha;Rohan;Priya;Sam,,`;
     
     // We dynamically import the ImportService to process this CSV
