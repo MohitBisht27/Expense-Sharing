@@ -1,10 +1,10 @@
-import User from "./User.model.js";
-import Group from "./Group.model.js";
-import GroupMember from "./GroupMember.model.js";
-import Expense from "./Expense.model.js";
-import ExpenseSplit from "./ExpenseSplit.model.js";
-import Settlement from "./Settlement.model.js";
-import ImportLog from "./ImportLog.model.js";
+import User from "./user.model.js";
+import Group from "./group.model.js";
+import GroupMember from "./groupMember.model.js";
+import Expense from "./expense.model.js";
+import ExpenseSplit from "./expenseSplit.model.js";
+import Settlement from "./settlement.model.js";
+import ImportLog from "./importLog.model.js";
 
 User.belongsToMany(Group, { through: GroupMember, foreignKey: "userId" });
 Group.belongsToMany(User, { through: GroupMember, foreignKey: "groupId" });
