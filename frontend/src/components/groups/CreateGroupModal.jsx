@@ -1,5 +1,4 @@
-// frontend/src/components/groups/CreateGroupModal.jsx
-import React, { useState } from "react";
+import { useState } from "react";
 import Modal from "../common/Modal";
 import Input from "../common/Input";
 import Button from "../common/Button";
