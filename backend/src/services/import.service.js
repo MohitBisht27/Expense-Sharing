@@ -177,6 +177,18 @@ class ImportService {
         anomaliesForRow.push(splitAnomaly);
       }
 
+      // Check split participants in memberMap
+      const participants = this.parseParticipants(row.SplitWith);
+      participants.forEach((p) => {
+        if (!memberMap[p.name.toLowerCase()]) {
+          anomaliesForRow.push({
+            type: ANOMALY_TYPES.MEMBER_NOT_IN_GROUP,
+            message: `Split participant "${p.name}" not found in group`,
+            action: ANOMALY_ACTIONS.SKIP,
+          });
+        }
+      });
+
       // 10. Check for inconsistent format
       if (
         row.SplitType &&
@@ -314,7 +326,13 @@ class ImportService {
         );
 
         // Create splits
-        const participants = this.parseParticipants(row.SplitWith);
+        let participants = this.parseParticipants(row.SplitWith);
+        if (participants.length === 0 && splitType === "EQUAL") {
+          participants = Object.keys(memberMap).map((name) => ({
+            name,
+            value: null,
+          }));
+        }
         const splits = await this.calculateSplits(
           expense,
           participants,
@@ -352,17 +370,24 @@ class ImportService {
     const totalAmount = parseFloat(expense.amountInINR);
 
     if (splitType === "EQUAL") {
-      const perPerson = totalAmount / (participants.length || 1);
-
-      for (const participant of participants) {
+      const perPerson = parseFloat((totalAmount / (participants.length || 1)).toFixed(2));
+      let sum = 0;
+      participants.forEach((participant, index) => {
         const member = memberMap[participant.name.toLowerCase()];
         if (member) {
+          let amountOwed;
+          if (index === participants.length - 1) {
+            amountOwed = parseFloat((totalAmount - sum).toFixed(2));
+          } else {
+            amountOwed = perPerson;
+            sum += perPerson;
+          }
           splits.push({
             userId: member.userId,
-            amountOwed: parseFloat(perPerson.toFixed(2)),
+            amountOwed,
           });
         }
-      }
+      });
     } else if (splitType === "EXACT") {
       for (const participant of participants) {
         const member = memberMap[participant.name.toLowerCase()];
@@ -390,19 +415,28 @@ class ImportService {
         (sum, p) => sum + (p.value || 1),
         0,
       );
-
-      for (const participant of participants) {
+      let sum = 0;
+      participants.forEach((participant, index) => {
         const member = memberMap[participant.name.toLowerCase()];
         if (member) {
           const shares = participant.value || 1;
-          const amount = (totalAmount * shares) / totalShares;
+          let amountOwed;
+          if (index === participants.length - 1) {
+            amountOwed = parseFloat((totalAmount - sum).toFixed(2));
+          } else {
+            const shareAmount = parseFloat(
+              ((totalAmount * shares) / totalShares).toFixed(2),
+            );
+            amountOwed = shareAmount;
+            sum += shareAmount;
+          }
           splits.push({
             userId: member.userId,
-            amountOwed: parseFloat(amount.toFixed(2)),
+            amountOwed,
             shares,
           });
         }
-      }
+      });
     }
 
     return splits;

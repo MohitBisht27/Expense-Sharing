@@ -5,6 +5,7 @@ import {
   getGroupBalance,
   getUserBalanceDetails,
   getSuggestedSettlements,
+  getUserSummaryBalances,
 } from "../controllers/settlement.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 
@@ -12,6 +13,7 @@ const router = express.Router();
 
 router.use(protect);
 
+router.get("/user/summary", getUserSummaryBalances);
 router.post("/", createSettlement);
 router.get("/group/:groupId", getGroupSettlements);
 router.get("/group/:groupId/balance", getGroupBalance);

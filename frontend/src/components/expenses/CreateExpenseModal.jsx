@@ -69,9 +69,15 @@ const CreateExpenseModal = ({ isOpen, onClose, groupId, onSuccess }) => {
     const newSplits = [...splits];
 
     if (splitType === "EQUAL") {
-      const perPerson = amount / newSplits.length;
-      newSplits.forEach((split) => {
-        split.amountOwed = parseFloat(perPerson.toFixed(2));
+      const perPerson = parseFloat((amount / newSplits.length).toFixed(2));
+      let sum = 0;
+      newSplits.forEach((split, index) => {
+        if (index === newSplits.length - 1) {
+          split.amountOwed = parseFloat((amount - sum).toFixed(2));
+        } else {
+          split.amountOwed = perPerson;
+          sum += perPerson;
+        }
       });
     } else if (splitType === "PERCENTAGE") {
       newSplits.forEach((split) => {
@@ -84,10 +90,17 @@ const CreateExpenseModal = ({ isOpen, onClose, groupId, onSuccess }) => {
         (sum, s) => sum + (s.shares || 1),
         0,
       );
-      newSplits.forEach((split) => {
-        split.amountOwed = parseFloat(
-          ((amount * (split.shares || 1)) / totalShares).toFixed(2),
-        );
+      let sum = 0;
+      newSplits.forEach((split, index) => {
+        if (index === newSplits.length - 1) {
+          split.amountOwed = parseFloat((amount - sum).toFixed(2));
+        } else {
+          const shareAmount = parseFloat(
+            ((amount * (split.shares || 1)) / totalShares).toFixed(2),
+          );
+          split.amountOwed = shareAmount;
+          sum += shareAmount;
+        }
       });
     }
 
@@ -178,14 +191,12 @@ const CreateExpenseModal = ({ isOpen, onClose, groupId, onSuccess }) => {
           />
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Currency
-            </label>
+            <label className="input-label">Currency</label>
             <select
               name="currency"
               value={formData.currency}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-field"
             >
               <option value="INR">INR (₹)</option>
               <option value="USD">USD ($)</option>
@@ -193,14 +204,12 @@ const CreateExpenseModal = ({ isOpen, onClose, groupId, onSuccess }) => {
           </div>
 
           <div>
-            <label className="block mb-1 text-sm font-medium text-gray-700">
-              Paid By
-            </label>
+            <label className="input-label">Paid By</label>
             <select
               name="paidBy"
               value={formData.paidBy}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input-field"
               required
             >
               <option value="">Select member</option>
@@ -232,9 +241,7 @@ const CreateExpenseModal = ({ isOpen, onClose, groupId, onSuccess }) => {
         </div>
 
         <div>
-          <label className="block mb-2 text-sm font-medium text-gray-700">
-            Split Type
-          </label>
+          <label className="input-label">Split Type</label>
           <div className="grid grid-cols-4 gap-2">
             {["EQUAL", "EXACT", "PERCENTAGE", "SHARES"].map((type) => (
               <button
@@ -243,10 +250,10 @@ const CreateExpenseModal = ({ isOpen, onClose, groupId, onSuccess }) => {
                 onClick={() =>
                   handleChange({ target: { name: "splitType", value: type } })
                 }
-                className={`px-4 py-2 rounded-lg border-2 transition-colors ${
+                className={`btn-base px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   formData.splitType === type
-                    ? "border-blue-600 bg-blue-50 text-blue-700"
-                    : "border-gray-300 hover:border-gray-400"
+                    ? "bg-indigo-50 text-indigo-600 border-2 border-indigo-400"
+                    : "bg-slate-50 text-slate-600 border-2 border-slate-200 hover:border-slate-300"
                 }`}
               >
                 {type}
@@ -263,26 +270,24 @@ const CreateExpenseModal = ({ isOpen, onClose, groupId, onSuccess }) => {
         />
 
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Notes (Optional)
-          </label>
+          <label className="input-label">Notes (Optional)</label>
           <textarea
             name="notes"
             value={formData.notes}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-field resize-none"
             rows="3"
             placeholder="Add any additional notes"
           />
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+          <div className="flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
             {error}
           </div>
         )}
 
-        <div className="flex space-x-3 pt-4">
+        <div className="flex gap-3 pt-4">
           <Button
             type="button"
             variant="secondary"

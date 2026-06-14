@@ -9,4 +9,6 @@ export const settlementAPI = {
     axios.get(`/settlements/group/${groupId}/user/${userId}/details`),
   getSuggestedSettlements: (groupId) =>
     axios.get(`/settlements/group/${groupId}/suggest`),
+  getUserSummaryBalances: () =>
+    axios.get("/settlements/user/summary"),
 };

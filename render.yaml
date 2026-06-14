@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: expense-sharing-api
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: FRONTEND_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRE
+        value: 7d
+      - key: DB_HOST
+        fromDatabase:
+          name: expense-sharing-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: expense-sharing-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: expense-sharing-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: expense-sharing-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: expense-sharing-db
+          property: password
+
+databases:
+  - name: expense-sharing-db
+    plan: free
+    databaseName: expense_sharing
+    user: expense_user

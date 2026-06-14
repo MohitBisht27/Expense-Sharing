@@ -11,6 +11,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import GroupDetails from "./pages/GroupDetails";
 import Import from "./pages/Import";
+import Balances from "./pages/Balances";
 import Loader from "./components/common/Loader";
 
 const ProtectedRoute = ({ children }) => {
@@ -18,7 +19,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen min-h-dvh flex items-center justify-center bg-page">
         <Loader />
       </div>
     );
@@ -33,7 +34,7 @@ const PublicRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen min-h-dvh flex items-center justify-center bg-auth-page">
         <Loader />
       </div>
     );
@@ -85,6 +86,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <Import />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/balance"
+        element={
+          <ProtectedRoute>
+            <Balances />
           </ProtectedRoute>
         }
       />

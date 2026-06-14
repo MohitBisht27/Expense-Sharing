@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
-import { TrendingUp, TrendingDown, AlertCircle } from "lucide-react";
+import { TrendingUp, TrendingDown, Scale, ArrowRight, Sparkles } from "lucide-react";
 import BalanceCard from "./BalanceCard";
 import Button from "../common/Button";
 import { settlementAPI } from "../../api/settlement.api";
 import Loader from "../common/Loader";
 
-const BalanceSummary = ({ groupId, currentUserId }) => {
+const BalanceSummary = ({ groupId, currentUserId, members = [] }) => {
+  const getUserName = (id) => {
+    const member = members.find((m) => m.userId === id);
+    return member?.user?.name || `User #${id.substring(0, 8)}`;
+  };
   const [balances, setBalances] = useState({});
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,18 +45,15 @@ const BalanceSummary = ({ groupId, currentUserId }) => {
 
   if (loading) return <Loader />;
 
-  // Calculate summary for current user
   const userOwes = {};
   const userIsOwed = {};
 
   Object.keys(balances).forEach((owerId) => {
     Object.keys(balances[owerId]).forEach((ownerId) => {
       const amount = balances[owerId][ownerId];
-
       if (owerId === currentUserId) {
         userOwes[ownerId] = (userOwes[ownerId] || 0) + amount;
       }
-
       if (ownerId === currentUserId) {
         userIsOwed[owerId] = (userIsOwed[owerId] || 0) + amount;
       }
@@ -60,82 +61,105 @@ const BalanceSummary = ({ groupId, currentUserId }) => {
   });
 
   const totalOwed = Object.values(userOwes).reduce((sum, amt) => sum + amt, 0);
-  const totalIsOwed = Object.values(userIsOwed).reduce(
-    (sum, amt) => sum + amt,
-    0,
-  );
+  const totalIsOwed = Object.values(userIsOwed).reduce((sum, amt) => sum + amt, 0);
   const netBalance = totalIsOwed - totalOwed;
 
+  const allSettled =
+    Object.keys(userOwes).length === 0 && Object.keys(userIsOwed).length === 0;
+
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+      <div className="stats-grid">
+        <div className="rounded-2xl p-5 bg-gradient-to-br from-red-50 to-rose-50 border border-red-100">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-red-800">You Owe</p>
-            <TrendingDown className="w-5 h-5 text-red-600" />
+            <p className="text-xs font-bold uppercase tracking-widest text-red-500">You Owe</p>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center">
+              <TrendingDown className="w-4 h-4 text-white" />
+            </div>
           </div>
-          <p className="text-3xl font-bold text-red-600">
+          <p className="text-2xl font-extrabold text-red-600 tracking-tight">
             ₹{totalOwed.toFixed(2)}
           </p>
         </div>
 
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+        <div className="rounded-2xl p-5 bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-green-800">You Are Owed</p>
-            <TrendingUp className="w-5 h-5 text-green-600" />
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-600">Owed to You</p>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-white" />
+            </div>
           </div>
-          <p className="text-3xl font-bold text-green-600">
+          <p className="text-2xl font-extrabold text-emerald-600 tracking-tight">
             ₹{totalIsOwed.toFixed(2)}
           </p>
         </div>
 
         <div
-          className={`${netBalance >= 0 ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"} border rounded-lg p-6`}
+          className={`rounded-2xl p-5 border ${
+            netBalance >= 0
+              ? "bg-gradient-to-br from-indigo-50 to-violet-50 border-indigo-100"
+              : "bg-gradient-to-br from-red-50 to-rose-50 border-red-100"
+          }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-gray-800">Net Balance</p>
-            <AlertCircle
-              className={`w-5 h-5 ${netBalance >= 0 ? "text-green-600" : "text-red-600"}`}
-            />
+            <p className={`text-xs font-bold uppercase tracking-widest ${netBalance >= 0 ? "text-indigo-500" : "text-red-500"}`}>
+              Net Balance
+            </p>
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br ${netBalance >= 0 ? "from-indigo-500 to-violet-600" : "from-red-500 to-rose-600"}`}>
+              <Scale className="w-4 h-4 text-white" />
+            </div>
           </div>
-          <p
-            className={`text-3xl font-bold ${netBalance >= 0 ? "text-green-600" : "text-red-600"}`}
-          >
+          <p className={`text-2xl font-extrabold tracking-tight ${netBalance >= 0 ? "text-indigo-600" : "text-red-600"}`}>
             {netBalance >= 0 ? "+" : ""}₹{netBalance.toFixed(2)}
           </p>
         </div>
       </div>
 
-      {/* Simplify Button */}
-      <div className="flex justify-center">
-        <Button onClick={fetchSuggestions}>Suggest Optimal Settlements</Button>
-      </div>
+      {/* Suggest Settlements */}
+      {!allSettled && (
+        <div className="flex">
+          <Button variant="outline" onClick={fetchSuggestions}>
+            <Sparkles className="w-4 h-4" />
+            Suggest Optimal Settlements
+          </Button>
+        </div>
+      )}
 
-      {/* Suggested Settlements */}
+      {/* Suggestions */}
       {showSuggestions && suggestions.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4 text-blue-900">
-            Suggested Settlements (Minimized Transactions)
+        <div className="rounded-2xl p-5 bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-100">
+          <h3 className="text-sm font-bold text-indigo-800 uppercase tracking-widest mb-4">
+            Suggested Settlements
           </h3>
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             {suggestions.map((suggestion, index) => (
               <div
                 key={index}
-                className="bg-white p-4 rounded-lg flex items-center justify-between"
+                className="bg-white p-4 rounded-xl flex items-center justify-between border border-indigo-100/60"
               >
-                <div>
-                  <p className="font-medium">
-                    {suggestion.from.name} → {suggestion.to.name}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {suggestion.from.email}
-                  </p>
+                <div className="flex items-center gap-3">
+                  <div className="avatar">{suggestion.from.name[0]}</div>
+                  <div>
+                    <p className="font-semibold text-slate-800 text-sm">
+                      {suggestion.from.name}
+                    </p>
+                    <p className="text-xs text-slate-400">{suggestion.from.email}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-blue-600">
-                    ₹{suggestion.amount.toFixed(2)}
-                  </p>
+                <ArrowRight className="w-4 h-4 text-indigo-300" />
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <p className="text-lg font-extrabold text-indigo-600">
+                      ₹{suggestion.amount.toFixed(2)}
+                    </p>
+                  </div>
+                  <div className="avatar">{suggestion.to.name[0]}</div>
+                  <div>
+                    <p className="font-semibold text-slate-800 text-sm">
+                      {suggestion.to.name}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -145,28 +169,38 @@ const BalanceSummary = ({ groupId, currentUserId }) => {
 
       {/* Detailed Balances */}
       <div>
-        <h3 className="text-lg font-semibold mb-4">Detailed Balances</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="section-title text-base">Your Balances</h3>
+        </div>
 
-        {Object.keys(userOwes).length === 0 &&
-        Object.keys(userIsOwed).length === 0 ? (
-          <p className="text-center text-gray-500 py-8">All settled up! 🎉</p>
+        {allSettled ? (
+          <div className="text-center py-10">
+            <div className="empty-state-icon">
+              <Scale className="w-9 h-9 text-indigo-500" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-700 mb-1.5">All settled up! 🎉</h3>
+            <p className="text-slate-400 text-sm font-medium">
+              No outstanding balances in this group
+            </p>
+          </div>
         ) : (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-3">
             {Object.keys(userOwes).map((ownerId) => (
               <BalanceCard
                 key={ownerId}
                 type="owe"
                 userId={ownerId}
+                userName={getUserName(ownerId)}
                 amount={userOwes[ownerId]}
                 groupId={groupId}
               />
             ))}
-
             {Object.keys(userIsOwed).map((owerId) => (
               <BalanceCard
                 key={owerId}
                 type="owed"
                 userId={owerId}
+                userName={getUserName(owerId)}
                 amount={userIsOwed[owerId]}
                 groupId={groupId}
               />

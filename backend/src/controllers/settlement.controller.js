@@ -90,7 +90,7 @@ export const getUserBalanceDetails = asyncHandler(async (req, res) => {
     throw new ApiError(403, "You are not a member of this group");
   }
 
-  const details = await balanceService.getUserBalanceDetails(groupId, userId);
+  const details = await balanceService.getUserBalanceDetails(groupId, userId, req.user.id);
 
   res
     .status(200)
@@ -99,6 +99,20 @@ export const getUserBalanceDetails = asyncHandler(async (req, res) => {
         200,
         { details },
         "Balance details retrieved successfully",
+      ),
+    );
+});
+
+export const getUserSummaryBalances = asyncHandler(async (req, res) => {
+  const summary = await balanceService.getUserSummaryBalances(req.user.id);
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        summary,
+        "Consolidated balance summary retrieved successfully",
       ),
     );
 });

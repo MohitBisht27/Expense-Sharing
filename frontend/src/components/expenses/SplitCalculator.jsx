@@ -15,10 +15,17 @@ const SplitCalculator = ({ splits, splitType, totalAmount, onSplitChange }) => {
         (sum, s) => sum + (s.shares || 1),
         0,
       );
-      newSplits.forEach((split) => {
-        split.amountOwed = parseFloat(
-          ((totalAmount * (split.shares || 1)) / totalShares).toFixed(2),
-        );
+      let sum = 0;
+      newSplits.forEach((split, index) => {
+        if (index === newSplits.length - 1) {
+          split.amountOwed = parseFloat((totalAmount - sum).toFixed(2));
+        } else {
+          const shareAmount = parseFloat(
+            ((totalAmount * (split.shares || 1)) / totalShares).toFixed(2),
+          );
+          split.amountOwed = shareAmount;
+          sum += shareAmount;
+        }
       });
     }
 

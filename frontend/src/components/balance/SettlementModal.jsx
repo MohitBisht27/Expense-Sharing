@@ -42,9 +42,12 @@ const SettlementModal = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Record Settlement">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-sm text-blue-800">
-            You are settling a payment to confirm you've paid this amount.
+        <div className="flex gap-2.5 p-4 bg-indigo-50 border border-indigo-200 rounded-xl">
+          <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+            <span className="text-indigo-600 text-sm font-bold">ℹ</span>
+          </div>
+          <p className="text-sm text-indigo-800 font-medium">
+            You are settling a payment to confirm you&apos;ve paid this amount.
           </p>
         </div>
 
@@ -58,20 +61,18 @@ const SettlementModal = ({
         />
 
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Notes (Optional)
-          </label>
+          <label className="input-label">Notes (Optional)</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-field resize-none"
             rows="3"
             placeholder="Add payment method, reference, etc."
           />
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+          <div className="flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
             {error}
           </div>
         )}

@@ -46,26 +46,24 @@ const CreateGroupModal = ({ isOpen, onClose, onSuccess }) => {
         />
 
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            Description (Optional)
-          </label>
+          <label className="input-label">Description (Optional)</label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input-field resize-none"
             rows="3"
             placeholder="Add a description for your group"
           />
         </div>
 
         {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+          <div className="flex items-start gap-2.5 p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
             {error}
           </div>
         )}
 
-        <div className="flex space-x-3 pt-4">
+        <div className="flex gap-3 pt-4">
           <Button
             type="button"
             variant="secondary"

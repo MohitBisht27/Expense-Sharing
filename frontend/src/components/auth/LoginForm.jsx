@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Mail, Lock } from "lucide-react";
+import { Mail, Lock, AlertCircle } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import Input from "../common/Input";
 import Button from "../common/Button";
@@ -23,40 +23,45 @@ const LoginForm = () => {
       await login(email, password);
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message || "Login failed");
+      setError(err.message || "Login failed. Please check your credentials.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="auth-form">
       <Input
-        label="Email"
+        label="Email address"
         type="email"
+        icon={Mail}
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter your email"
+        placeholder="you@example.com"
         required
+        autoComplete="email"
       />
 
       <Input
         label="Password"
         type="password"
+        icon={Lock}
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        placeholder="Enter your password"
+        placeholder="••••••••"
         required
+        autoComplete="current-password"
       />
 
       {error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-          {error}
+        <div className="auth-error" role="alert">
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
-      <Button type="submit" className="w-full" loading={loading}>
-        Login
+      <Button type="submit" size="lg" className="w-full !mt-1" loading={loading}>
+        Sign in to your account
       </Button>
     </form>
   );

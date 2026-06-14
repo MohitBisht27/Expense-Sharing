@@ -1,4 +1,4 @@
-import { Expense, ExpenseSplit, Settlement, User } from "../model/index.js";
+import { Expense, ExpenseSplit, Settlement, User, Group, GroupMember } from "../model/index.js";
 import { Op } from "sequelize";
 
 class BalanceService {
@@ -100,11 +100,20 @@ class BalanceService {
    * Get detailed balance breakdown for a user in a group
    * Shows which expenses contribute to their balance
    */
-  async getUserBalanceDetails(groupId, userId) {
+  async getUserBalanceDetails(groupId, userId, otherUserId) {
     const expenses = await Expense.findAll({
       where: {
         groupId,
-        [Op.or]: [{ paidBy: userId }, { "$splits.userId$": userId }],
+        [Op.or]: [
+          {
+            paidBy: userId,
+            "$splits.userId$": otherUserId,
+          },
+          {
+            paidBy: otherUserId,
+            "$splits.userId$": userId,
+          },
+        ],
       },
       include: [
         {
@@ -114,17 +123,22 @@ class BalanceService {
         },
         { model: User, as: "payer", attributes: ["id", "name"] },
       ],
+      order: [["expenseDate", "DESC"]],
     });
 
     const settlements = await Settlement.findAll({
       where: {
         groupId,
-        [Op.or]: [{ paidBy: userId }, { paidTo: userId }],
+        [Op.or]: [
+          { paidBy: userId, paidTo: otherUserId },
+          { paidBy: otherUserId, paidTo: userId },
+        ],
       },
       include: [
         { model: User, as: "payer", attributes: ["id", "name"] },
         { model: User, as: "receiver", attributes: ["id", "name"] },
       ],
+      order: [["settledAt", "DESC"]],
     });
 
     const details = {
@@ -138,15 +152,20 @@ class BalanceService {
     };
 
     expenses.forEach((expense) => {
-      const userSplit = expense.splits.find((s) => s.userId === userId);
-      const isPayer = expense.paidBy === userId;
+      const isPayer = expense.paidBy === otherUserId; // true if logged-in user paid
+      const owerSplit = expense.splits.find((s) => s.userId === (isPayer ? userId : otherUserId));
 
       if (isPayer) {
         details.summary.totalPaid += parseFloat(expense.amountInINR);
       }
 
-      if (userSplit) {
-        details.summary.totalOwed += parseFloat(userSplit.amountOwed);
+      if (owerSplit) {
+        const owedAmt = parseFloat(owerSplit.amountOwed);
+        if (isPayer) {
+          // details.summary.totalPaid is already updated, we don't double count.
+        } else {
+          details.summary.totalOwed += owedAmt;
+        }
 
         details.expenses.push({
           id: expense.id,
@@ -155,14 +174,15 @@ class BalanceService {
           currency: expense.currency,
           date: expense.expenseDate,
           paidBy: expense.payer.name,
-          yourShare: userSplit.amountOwed,
+          yourShare: isPayer ? 0 : owedAmt,
           youPaid: isPayer,
+          amountOwed: owedAmt,
         });
       }
     });
 
     settlements.forEach((settlement) => {
-      const isPayer = settlement.paidBy === userId;
+      const isPayer = settlement.paidBy === otherUserId;
       const amount = parseFloat(settlement.amount);
 
       details.settlements.push({
@@ -177,13 +197,33 @@ class BalanceService {
       if (isPayer) {
         details.summary.totalPaid += amount;
       } else {
-        details.summary.totalOwed -= amount;
+        details.summary.totalOwed -= amount; // reduces what we owe
       }
     });
 
-    details.summary.netBalance = parseFloat(
-      (details.summary.totalPaid - details.summary.totalOwed).toFixed(2),
-    );
+    let net = 0;
+    expenses.forEach((e) => {
+      const isPayer = e.paidBy === otherUserId;
+      const split = e.splits.find((s) => s.userId === (isPayer ? userId : otherUserId));
+      if (split) {
+        if (isPayer) {
+          net += parseFloat(split.amountOwed);
+        } else {
+          net -= parseFloat(split.amountOwed);
+        }
+      }
+    });
+
+    settlements.forEach((s) => {
+      const isPayer = s.paidBy === otherUserId;
+      if (isPayer) {
+        net += parseFloat(s.amount);
+      } else {
+        net -= parseFloat(s.amount);
+      }
+    });
+
+    details.summary.netBalance = parseFloat(net.toFixed(2));
 
     return details;
   }
@@ -257,6 +297,52 @@ class BalanceService {
     }
 
     return settlements;
+  }
+  async getUserSummaryBalances(userId) {
+    const members = await GroupMember.findAll({
+      where: { userId, isActive: true },
+      include: [{ model: Group }],
+    });
+
+    const summary = [];
+    let overallNetBalance = 0;
+
+    for (const member of members) {
+      const groupId = member.groupId;
+      const groupBalances = await this.calculateGroupBalances(groupId);
+
+      let userOwed = 0;
+      let userOwes = 0;
+
+      Object.keys(groupBalances).forEach((owerId) => {
+        Object.keys(groupBalances[owerId]).forEach((ownerId) => {
+          const amount = groupBalances[owerId][ownerId];
+          if (owerId === userId) {
+            userOwes += amount;
+          }
+          if (ownerId === userId) {
+            userOwed += amount;
+          }
+        });
+      });
+
+      const netBalance = userOwed - userOwes;
+      overallNetBalance += netBalance;
+
+      summary.push({
+        groupId,
+        groupName: member.Group.name,
+        description: member.Group.description,
+        userOwed: parseFloat(userOwed.toFixed(2)),
+        userOwes: parseFloat(userOwes.toFixed(2)),
+        netBalance: parseFloat(netBalance.toFixed(2)),
+      });
+    }
+
+    return {
+      summary,
+      overallNetBalance: parseFloat(overallNetBalance.toFixed(2)),
+    };
   }
 }
 

@@ -1,9 +1,7 @@
 const Card = ({ children, className = "", onClick, hover = false }) => {
   return (
     <div
-      className={`bg-white rounded-lg shadow-md p-6 ${
-        hover ? "hover:shadow-lg transition-shadow cursor-pointer" : ""
-      } ${className}`}
+      className={`card-elevated ${hover ? "card-hover" : ""} p-6 ${className}`}
       onClick={onClick}
     >
       {children}
