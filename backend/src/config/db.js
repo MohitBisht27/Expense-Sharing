@@ -40,6 +40,13 @@ const sequelize = process.env.DATABASE_URL
 
 export const connectDB = async () => {
   try {
+    console.log("Attempting database connection...");
+    if (process.env.DATABASE_URL) {
+      console.log("Using DATABASE_URL connection string...");
+    } else {
+      console.log(`Using individual DB variables. Target Host: ${process.env.DB_HOST || 'localhost (default)'}`);
+    }
+    
     await sequelize.authenticate();
     console.log("Database connected successfully");
     await sequelize.sync({ alter: process.env.NODE_ENV === "development" });
