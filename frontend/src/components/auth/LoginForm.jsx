@@ -6,8 +6,8 @@ import Input from "../common/Input";
 import Button from "../common/Button";
 
 const LoginForm = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("aisha@example.com");
+  const [password, setPassword] = useState("password123");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -63,6 +63,28 @@ const LoginForm = () => {
       <Button type="submit" size="lg" className="w-full !mt-1" loading={loading}>
         Sign in to your account
       </Button>
+
+      <div className="mt-6 pt-6 border-t border-slate-200">
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Test Accounts</p>
+        <div className="flex flex-col gap-2">
+          <button 
+            type="button"
+            onClick={() => { setEmail("aisha@example.com"); setPassword("password123"); }}
+            className="text-left text-sm p-2 rounded border border-slate-200 hover:bg-slate-50 transition-colors"
+          >
+            <span className="font-bold text-slate-700">Aisha</span> (Group Creator) <br/>
+            <span className="text-slate-500">aisha@example.com / password123</span>
+          </button>
+          <button 
+            type="button"
+            onClick={() => { setEmail("meera@example.com"); setPassword("password123"); }}
+            className="text-left text-sm p-2 rounded border border-slate-200 hover:bg-slate-50 transition-colors"
+          >
+            <span className="font-bold text-slate-700">Meera</span> (Moved out in March) <br/>
+            <span className="text-slate-500">meera@example.com / password123</span>
+          </button>
+        </div>
+      </div>
     </form>
   );
 };

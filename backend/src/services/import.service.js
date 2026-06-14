@@ -24,7 +24,22 @@ class ImportService {
     return new Promise((resolve, reject) => {
       streamifier
         .createReadStream(buffer)
-        .pipe(csv())
+        .pipe(csv({
+          mapHeaders: ({ header }) => {
+            const map = {
+              'date': 'Date',
+              'description': 'Description',
+              'paid_by': 'PaidBy',
+              'amount': 'Amount',
+              'currency': 'Currency',
+              'split_type': 'SplitType',
+              'split_with': 'SplitWith',
+              'split_details': 'SplitDetails',
+              'notes': 'Notes'
+            };
+            return map[header.trim().toLowerCase()] || header.trim();
+          }
+        }))
         .on("data", (row) => {
           this.rowCount++;
           rows.push({ ...row, rowNumber: this.rowCount });
