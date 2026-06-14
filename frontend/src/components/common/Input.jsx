@@ -7,23 +7,37 @@ const Input = ({
   ...props
 }) => {
   return (
-    <div className={`flex flex-col ${containerClassName}`}>
+    <div style={{ display: 'flex', flexDirection: 'column' }} className={containerClassName}>
       {label && <label className="input-label">{label}</label>}
-      <div className="input-wrap relative">
+      <div style={{ position: 'relative' }}>
         {Icon && (
-          <div className="input-icon-wrap absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-            <Icon className="w-4 h-4" />
+          <div
+            style={{
+              position: 'absolute',
+              left: '0.75rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              pointerEvents: 'none',
+              color: '#94a3b8',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1,
+            }}
+          >
+            <Icon style={{ width: '1rem', height: '1rem' }} />
           </div>
         )}
         <input
-          className={`input-field ${Icon ? "pl-10" : ""} ${error ? "error" : ""} ${className}`}
+          className={`input-field ${error ? "error" : ""} ${className}`}
+          style={Icon ? { paddingLeft: '2.5rem' } : undefined}
           {...props}
         />
       </div>
       {error && (
         <span className="mt-1.5 text-xs font-semibold text-red-500 flex items-center gap-1 animate-slide-up">
           <svg
-            className="w-3 h-3 flex-shrink-0"
+            style={{ width: '0.75rem', height: '0.75rem', flexShrink: 0 }}
             fill="currentColor"
             viewBox="0 0 20 20"
           >

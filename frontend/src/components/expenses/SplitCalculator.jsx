@@ -41,10 +41,10 @@ const SplitCalculator = ({ splits, splitType, totalAmount, onSplitChange }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
-        <h4 className="text-sm font-medium text-gray-700">Split Details</h4>
+        <h4 className="text-sm font-semibold text-slate-700">Split Details</h4>
         <div className="text-sm">
           <span
-            className={difference === 0 ? "text-green-600" : "text-red-600"}
+            style={{ color: difference === 0 ? '#059669' : '#dc2626', fontWeight: 600 }}
           >
             {difference === 0
               ? "✓ Balanced"
@@ -53,14 +53,15 @@ const SplitCalculator = ({ splits, splitType, totalAmount, onSplitChange }) => {
         </div>
       </div>
 
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="space-y-3" style={{ maxHeight: '24rem', overflowY: 'auto' }}>
         {splits.map((split, index) => (
           <div
             key={split.userId}
-            className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+            className="flex items-center gap-3 p-3 rounded-xl"
+            style={{ background: '#f8fafc', border: '1px solid #f1f5f9' }}
           >
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-semibold text-slate-800">
                 {split.userName}
               </p>
             </div>
@@ -79,7 +80,7 @@ const SplitCalculator = ({ splits, splitType, totalAmount, onSplitChange }) => {
             )}
 
             {splitType === "PERCENTAGE" && (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-2">
                 <Input
                   type="number"
                   step="0.01"
@@ -90,7 +91,7 @@ const SplitCalculator = ({ splits, splitType, totalAmount, onSplitChange }) => {
                   placeholder="0"
                   className="w-20"
                 />
-                <span className="text-sm text-gray-600">%</span>
+                <span className="text-sm text-slate-500">%</span>
               </div>
             )}
 
@@ -108,7 +109,7 @@ const SplitCalculator = ({ splits, splitType, totalAmount, onSplitChange }) => {
             )}
 
             <div className="text-right">
-              <p className="text-sm font-semibold text-blue-600">
+              <p className="text-sm font-bold text-indigo-600">
                 ₹{parseFloat(split.amountOwed || 0).toFixed(2)}
               </p>
             </div>
@@ -116,9 +117,9 @@ const SplitCalculator = ({ splits, splitType, totalAmount, onSplitChange }) => {
         ))}
       </div>
 
-      <div className="flex justify-between pt-3 border-t">
-        <span className="font-medium">Total Split:</span>
-        <span className="font-bold text-lg">₹{totalSplit.toFixed(2)}</span>
+      <div className="flex justify-between pt-3" style={{ borderTop: '1px solid #e2e8f0' }}>
+        <span className="font-semibold text-slate-700">Total Split:</span>
+        <span className="font-bold text-lg text-slate-800">₹{totalSplit.toFixed(2)}</span>
       </div>
     </div>
   );

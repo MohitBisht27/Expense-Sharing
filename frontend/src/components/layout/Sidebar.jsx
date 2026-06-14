@@ -13,8 +13,8 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-gray-800 min-h-screen p-4">
-      <nav className="space-y-2">
+    <div style={{ width: '16rem', background: '#1e293b', minHeight: '100vh', padding: '1rem' }}>
+      <nav className="flex flex-col gap-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -23,13 +23,17 @@ const Sidebar = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
-                isActive
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-300 hover:bg-gray-700"
-              }`}
+              className="flex items-center gap-3 rounded-xl"
+              style={{
+                padding: '0.75rem 1rem',
+                transition: 'all 0.2s',
+                fontSize: '0.875rem',
+                fontWeight: 600,
+                background: isActive ? '#6366f1' : 'transparent',
+                color: isActive ? '#ffffff' : '#94a3b8',
+              }}
             >
-              <Icon className="w-5 h-5" />
+              <Icon style={{ width: '1.25rem', height: '1.25rem' }} />
               <span>{item.label}</span>
             </Link>
           );

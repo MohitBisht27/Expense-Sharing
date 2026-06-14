@@ -1,4 +1,4 @@
-import { Download, FileText } from "lucide-react";
+import { Download, FileText, CheckCircle } from "lucide-react";
 import Button from "../common/Button";
 
 const ImportReport = ({ report }) => {
@@ -68,36 +68,36 @@ END OF REPORT
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center">
-          <FileText className="w-6 h-6 text-blue-600 mr-2" />
-          <h3 className="text-xl font-bold text-gray-900">Import Report</h3>
+    <div className="card-elevated rounded-2xl p-6">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <FileText style={{ width: '1.25rem', height: '1.25rem', color: '#4f46e5' }} />
+          <h3 className="text-lg font-bold text-slate-800">Import Report</h3>
         </div>
         <Button size="sm" variant="outline" onClick={generateReport}>
-          <Download className="w-4 h-4 mr-2" />
+          <Download style={{ width: '1rem', height: '1rem' }} />
           Download Report
         </Button>
       </div>
 
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm text-gray-600">Success Rate</p>
-            <p className="text-2xl font-bold text-gray-900">
+          <div className="rounded-xl p-4" style={{ background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Success Rate</p>
+            <p className="text-2xl font-extrabold text-slate-800">
               {((report.successfulRows / report.totalRows) * 100).toFixed(2)}%
             </p>
           </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <p className="text-sm text-gray-600">Anomalies Detected</p>
-            <p className="text-2xl font-bold text-gray-900">
+          <div className="rounded-xl p-4" style={{ background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Anomalies Detected</p>
+            <p className="text-2xl font-extrabold text-slate-800">
               {report.anomalies.length}
             </p>
           </div>
         </div>
 
-        <div className="border border-gray-200 rounded-lg p-4">
-          <h4 className="font-semibold text-gray-900 mb-3">
+        <div className="rounded-xl p-4" style={{ border: '1px solid #e2e8f0' }}>
+          <h4 className="font-bold text-slate-800 text-sm mb-3">
             Anomaly Type Breakdown
           </h4>
           <div className="space-y-2">
@@ -110,10 +110,10 @@ END OF REPORT
               }, {}),
             ).map(([type, count]) => (
               <div key={type} className="flex justify-between items-center">
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-slate-600 font-medium">
                   {type.replace(/_/g, " ")}
                 </span>
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                <span className="badge badge-blue">
                   {count}
                 </span>
               </div>
@@ -121,22 +121,24 @@ END OF REPORT
           </div>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h4 className="font-semibold text-blue-900 mb-2">
+        <div className="rounded-xl p-4" style={{ background: '#eef2ff', border: '1px solid #e0e7ff' }}>
+          <h4 className="font-bold text-sm mb-2" style={{ color: '#3730a3' }}>
             Import Policies Applied
           </h4>
-          <ul className="text-sm text-blue-800 space-y-1">
-            <li>
-              ✓ Duplicate detection based on description, amount, date, and
-              payer
-            </li>
-            <li>
-              ✓ Currency conversion (USD → INR) at configured exchange rate
-            </li>
-            <li>✓ Member timeline validation against join/leave dates</li>
-            <li>✓ Split validation ensuring amounts match total</li>
-            <li>✓ Settlement detection and flagging</li>
-            <li>✓ Data type and format validation</li>
+          <ul className="text-sm space-y-1.5 font-medium" style={{ color: '#4338ca' }}>
+            {[
+              "Duplicate detection based on description, amount, date, and payer",
+              "Currency conversion (USD → INR) at configured exchange rate",
+              "Member timeline validation against join/leave dates",
+              "Split validation ensuring amounts match total",
+              "Settlement detection and flagging",
+              "Data type and format validation",
+            ].map((item) => (
+              <li key={item} className="flex items-center gap-2">
+                <CheckCircle style={{ width: '0.875rem', height: '0.875rem', color: '#818cf8', flexShrink: 0 }} />
+                {item}
+              </li>
+            ))}
           </ul>
         </div>
       </div>
