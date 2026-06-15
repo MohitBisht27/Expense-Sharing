@@ -1,29 +1,23 @@
 # AI Usage Log
 
-**AI Tool Used:** Gemini (Antigravity IDE)
-**Role:** Primary Development Collaborator / Full-Stack Pair Programmer
+**Tools Used:** Gemini (Antigravity IDE)  
+**Role:** Full-Stack Pair Programmer
 
-## Workflow Overview
-The AI was used extensively to transition from a conceptual understanding of the "flatmate spreadsheet" problem to a fully functional React/Node.js application. It assisted in schema design, backend logic generation, UI component creation, and debugging. 
+## Key Prompts I Used:
+*   *"Analyze the requirements for the Shared Expenses App assignment. Design a PostgreSQL schema that handles varying group memberships (joinedAt/leftAt) and multi-currency expenses."*
+*   *"Implement the CSV import service in Node.js. It needs to read 'expenses_export.csv' and detect 12 specific anomalies..."*
+*   *"Rewrite the frontend CSS to use a modern, premium design system (glassmorphism, micro-animations) and ensure full responsiveness."*
 
-**Key Prompts Used:**
-- *"Analyze the requirements for the Shared Expenses App assignment. Design a PostgreSQL database schema that can handle varying group memberships (joinedAt/leftAt) and multi-currency expenses."*
-- *"Implement the CSV import service in Node.js. It needs to read 'expenses_export.csv' and detect 12 specific anomalies such as Negative amounts, Currency mismatch (USD), Settlements masquerading as expenses, and Date validations against user group membership."*
-- *"The UI looks basic and relies on raw Tailwind classes. You are a 10-year experienced developer. Rewrite the CSS to use a modern, premium design system (glassmorphism, vibrant gradients, micro-animations) and make all pages fully responsive."*
+## Where the AI Messed Up (and how I fixed it!):
 
-## AI Correction Cases (When the AI was wrong and how it was fixed)
+### 1. The "Silent Failure" Import Bug
+*   **What went wrong:** When writing the CSV parser, the AI wrapped invalid data errors in a `try/catch` block and just silently dropped the bad rows. 
+*   **How I caught & fixed it:** The assignment specifically stated that silent guesses are failing answers. I made the AI completely rewrite the service to push an anomaly object (with policies like `REQUIRE_APPROVAL` or `SKIP`) into an array instead, which is then sent back to the user interface for review.
 
-### Case 1: Silent Failures in the Import Logic
-**What the AI produced:** Initially, when asked to write the CSV import logic, the AI wrote a parser that encountered invalid data (like an unparseable split format) and either threw an error crashing the entire import, or wrapped it in a `try/catch` and silently dropped the row without informing the user.
-**How it was caught:** The assignment explicitly stated: "A crashed import and a silent guess are both failing answers." I reviewed the import service code and noticed dropped rows had no UI representation.
-**What was changed:** I directed the AI to completely rewrite `import.service.js` using an Anomaly Tracking array. Instead of dropping rows, the code was updated to push an anomaly object (with `type`, `message`, and an `ACTION` policy like `REQUIRE_APPROVAL` or `SKIP`) into an array. This array is then returned to the frontend and rendered in the `AnomalyReview.jsx` component.
+### 2. Breaking the UI Icons
+*   **What went wrong:** While upgrading the UI, the AI tried applying Tailwind sizing classes (like `w-4 h-4`) directly to the Lucide React SVG components.
+*   **How I caught & fixed it:** I checked the browser and the icons on the Login page were completely mangled and overlapping the text. I instructed the AI to strip out the utility classes and use explicit, bulletproof inline styles (`style={{ width: '1rem' }}`) and flexbox positioning to fix the rendering.
 
-### Case 2: Icon Sizing Issues in the UI
-**What the AI produced:** During the UI overhaul, the AI updated the auth forms (Login/Register) to use Lucide React icons inside the input fields. It applied Tailwind sizing classes (e.g., `w-4 h-4`) directly to the `<Icon />` components. 
-**How it was caught:** After deploying the CSS changes, I used the browser subagent to take a screenshot of the login page. The icons were completely broken—they rendered as tiny, unrecognizable glyphs that overlapped the placeholder text. The Tailwind classes were not correctly applying to the underlying SVG elements in the specific CSS environment.
-**What was changed:** I instructed the AI to rewrite the `Input.jsx` wrapper component and the Login/Register pages. We removed the CSS utility classes for the icons and replaced them with bulletproof inline styles (`style={{ width: '1rem', height: '1rem' }}`) and explicit flexbox positioning to ensure perfect rendering regardless of stylesheet loading order.
-
-### Case 3: Balance Calculation with Left Members
-**What the AI produced:** The AI generated a greedy algorithm for debt simplification (calculating who owes whom). However, it initially pulled *all* group members into the calculation array regardless of their `isActive` or `leftAt` status.
-**How it was caught:** While reviewing the logic against the requirement "Why would March electricity affect my balance?", I realized that the balance calculation would try to distribute a generic "EQUAL" split expense to a member who had already moved out if the UI didn't strictly filter the participants.
-**What was changed:** The logic in `calculateSplits` inside the import service, as well as the backend balance controllers, was updated to strictly validate `expenseDate` against a member's `joinedAt` and `leftAt` timestamps. If a generic "EQUAL" split is logged in April, the AI was corrected to only divide the total among members whose `isActive` is true *and* whose timeline covers the April date.
+### 3. Charging Ghosts (The Balance Algorithm)
+*   **What went wrong:** The AI wrote a great debt-simplification algorithm, but it greedily pulled *all* group members into the split array—even if they had already moved out!
+*   **How I caught & fixed it:** I realized that if we logged a generic "EQUAL" split for April electricity, it would charge a roommate who left in March. I corrected the AI's logic to strictly validate the `expenseDate` against a member's `joinedAt` and `leftAt` timestamps before adding them to the math.
