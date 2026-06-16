@@ -6,6 +6,7 @@ import {
   updateExpense,
   deleteExpense,
   getCategories,
+  exportGroupExpenses,
 } from "../controllers/expense.controller.js";
 import { protect } from "../middleware/auth.middleware.js";
 
@@ -18,6 +19,7 @@ router.post("/", createExpense);
 router.route("/:id").get(getExpense).put(updateExpense).delete(deleteExpense);
 
 router.get("/group/:groupId", getGroupExpenses);
+router.get("/group/:groupId/export", exportGroupExpenses);
 router.get("/group/:groupId/categories", getCategories);
 
 export default router;

@@ -3,10 +3,12 @@ import { UserPlus, UserMinus, Calendar, Crown } from "lucide-react";
 import Button from "../common/Button";
 import { groupAPI } from "../../api/group.api";
 import Loader from "../common/Loader";
+import AddMemberModal from "./AddMemberModal";
 
 const GroupMembers = ({ groupId, isAdmin }) => {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAddMember, setShowAddMember] = useState(false);
 
   useEffect(() => {
     fetchMembers();
@@ -55,7 +57,7 @@ const GroupMembers = ({ groupId, isAdmin }) => {
           </p>
         </div>
         {isAdmin && (
-          <Button size="sm">
+          <Button size="sm" onClick={() => setShowAddMember(true)}>
             <UserPlus className="w-4 h-4" />
             Add Member
           </Button>
@@ -141,6 +143,13 @@ const GroupMembers = ({ groupId, isAdmin }) => {
           );
         })}
       </div>
+
+      <AddMemberModal
+        isOpen={showAddMember}
+        onClose={() => setShowAddMember(false)}
+        groupId={groupId}
+        onSuccess={fetchMembers}
+      />
     </div>
   );
 };

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  ArrowLeft, Plus, Users as UsersIcon, Receipt, TrendingUp, Calendar,
+  ArrowLeft, Plus, Users as UsersIcon, Receipt, TrendingUp, Calendar, Download
 } from "lucide-react";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/common/Button";
@@ -12,6 +12,7 @@ import GroupMembers from "../components/groups/GroupMembers";
 import BalanceSummary from "../components/balance/BalanceSummary";
 import Loader from "../components/common/Loader";
 import { groupAPI } from "../api/group.api";
+import { expenseAPI } from "../api/expense.api";
 import { useExpenses } from "../hooks/useExpenses";
 import { useAuth } from "../hooks/useAuth";
 
@@ -33,8 +34,27 @@ const GroupDetails = () => {
   const [activeTab, setActiveTab] = useState("expenses");
   const [showCreateExpense, setShowCreateExpense] = useState(false);
   const [selectedExpenseId, setSelectedExpenseId] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   const { expenses, loading: expensesLoading, refetch: refetchExpenses } = useExpenses(id);
+
+  const handleExportCSV = async () => {
+    try {
+      setExporting(true);
+      const response = await expenseAPI.exportGroupExpenses(id);
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `group_${id}_expenses.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Failed to export CSV", error);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const fetchGroup = async () => {
     try {
@@ -132,7 +152,11 @@ const GroupDetails = () => {
 
               {/* Add Expense button */}
               {activeTab === "expenses" && (
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 flex gap-2">
+                  <Button onClick={handleExportCSV} size="sm" variant="outline" loading={exporting}>
+                    <Download className="w-4 h-4" />
+                    Export CSV
+                  </Button>
                   <Button onClick={() => setShowCreateExpense(true)} size="sm">
                     <Plus className="w-4 h-4" />
                     Add Expense

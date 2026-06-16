@@ -9,4 +9,6 @@ export const expenseAPI = {
   deleteExpense: (id) => axios.delete(`/expenses/${id}`),
   getCategories: (groupId) =>
     axios.get(`/expenses/group/${groupId}/categories`),
+  exportGroupExpenses: (groupId) =>
+    axios.get(`/expenses/group/${groupId}/export`, { responseType: "blob" }),
 };

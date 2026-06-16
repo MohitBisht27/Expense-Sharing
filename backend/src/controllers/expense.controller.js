@@ -351,3 +351,77 @@ export const getCategories = asyncHandler(async (req, res) => {
       ),
     );
 });
+
+export const exportGroupExpenses = asyncHandler(async (req, res) => {
+  const { groupId } = req.params;
+
+  // Check membership
+  const isMember = await GroupMember.findOne({
+    where: { groupId, userId: req.user.id, isActive: true },
+  });
+
+  if (!isMember) {
+    throw new ApiError(403, "You are not a member of this group");
+  }
+
+  const expenses = await Expense.findAll({
+    where: { groupId },
+    include: [
+      { model: User, as: "payer", attributes: ["id", "name", "email"] },
+      {
+        model: ExpenseSplit,
+        as: "splits",
+        include: [
+          { model: User, as: "user", attributes: ["id", "name", "email"] },
+        ],
+      },
+    ],
+    order: [["expenseDate", "DESC"]],
+  });
+
+  let csv = "Date,Description,PaidBy,Amount,Currency,SplitType,SplitWith,SplitDetails,Notes,Category\n";
+
+  const escapeCSV = (str) => {
+    if (!str && str !== 0) return "";
+    let s = String(str).replace(/"/g, '""');
+    if (s.includes(",") || s.includes("\n") || s.includes('"')) {
+      return `"${s}"`;
+    }
+    return s;
+  };
+
+  expenses.forEach((exp) => {
+    const date = new Date(exp.expenseDate).toISOString().split("T")[0];
+    const desc = escapeCSV(exp.description);
+    const paidBy = escapeCSV(exp.payer?.name);
+    const amount = exp.amount;
+    const currency = exp.currency;
+    const splitType = exp.splitType;
+    
+    const splitWiths = [];
+    if (exp.splits && exp.splits.length > 0) {
+      exp.splits.forEach(s => {
+        let name = s.user?.name || "Unknown";
+        if (splitType === "EQUAL") {
+          splitWiths.push(name);
+        } else if (splitType === "EXACT") {
+          splitWiths.push(`${name}:${s.amountOwed}`);
+        } else if (splitType === "PERCENTAGE") {
+          splitWiths.push(`${name}:${s.percentage}`);
+        } else if (splitType === "SHARES") {
+          splitWiths.push(`${name}:${s.shares}`);
+        }
+      });
+    }
+    
+    const splitWithStr = escapeCSV(splitWiths.join(";"));
+    const notes = escapeCSV(exp.notes);
+    const category = escapeCSV(exp.category);
+
+    csv += `${date},${desc},${paidBy},${amount},${currency},${splitType},${splitWithStr},,${notes},${category}\n`;
+  });
+
+  res.setHeader("Content-Type", "text/csv");
+  res.setHeader("Content-Disposition", `attachment; filename=group_${groupId}_expenses.csv`);
+  res.status(200).send(csv);
+});

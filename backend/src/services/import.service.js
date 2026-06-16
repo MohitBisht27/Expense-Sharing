@@ -66,11 +66,18 @@ class ImportService {
 
       const memberMap = {};
       members.forEach((m) => {
-        memberMap[m.user.name.toLowerCase()] = {
+        const fullName = m.user.name.toLowerCase().trim();
+        const firstName = fullName.split(" ")[0];
+        const val = {
           userId: m.user.id,
           joinedAt: m.joinedAt,
           leftAt: m.leftAt,
+          name: m.user.name,
         };
+        memberMap[fullName] = val;
+        if (!memberMap[firstName]) {
+          memberMap[firstName] = val;
+        }
       });
 
       // Detect anomalies
@@ -113,13 +120,25 @@ class ImportService {
       }
 
       // 2. Check for invalid date
-      const date = new Date(row.Date);
+      let date = new Date(row.Date);
+      if (isNaN(date.getTime()) && row.Date) {
+        const parts = String(row.Date).trim().split(/[-/]/);
+        if (parts.length === 3) {
+          if (parts[0].length <= 2 && parts[2].length === 4) {
+            date = new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+          }
+        }
+      }
+
       if (isNaN(date.getTime())) {
         anomaliesForRow.push({
           type: ANOMALY_TYPES.INVALID_DATE,
           message: `Invalid date: ${row.Date}`,
           action: ANOMALY_ACTIONS.SKIP,
         });
+      } else {
+        // Normalize date to YYYY-MM-DD to use it properly later
+        row.Date = date.toISOString().split("T")[0];
       }
 
       // 3. Check for negative amount
@@ -146,7 +165,8 @@ class ImportService {
       }
 
       // 5. Check if payer is in group
-      const payer = memberMap[row.PaidBy?.toLowerCase()];
+      const payerName = row.PaidBy?.toLowerCase()?.trim();
+      const payer = payerName ? memberMap[payerName] : null;
       if (!payer) {
         anomaliesForRow.push({
           type: ANOMALY_TYPES.MEMBER_NOT_IN_GROUP,
@@ -195,7 +215,8 @@ class ImportService {
       // Check split participants in memberMap
       const participants = this.parseParticipants(row.SplitWith, row.SplitDetails);
       participants.forEach((p) => {
-        if (!memberMap[p.name.toLowerCase()]) {
+        const splitName = p.name.toLowerCase().trim();
+        if (!memberMap[splitName]) {
           anomaliesForRow.push({
             type: ANOMALY_TYPES.MEMBER_NOT_IN_GROUP,
             message: `Split participant "${p.name}" not found in group`,
@@ -205,9 +226,18 @@ class ImportService {
       });
 
       // 10. Check for inconsistent format
-      if (
-        row.SplitType &&
-        !Object.values(SPLIT_TYPES).includes(row.SplitType.toUpperCase())
+      let splitType = row.SplitType?.toUpperCase()?.trim();
+      if (splitType === "UNEQUAL") {
+        row.SplitType = "EXACT";
+        splitType = "EXACT";
+        anomaliesForRow.push({
+          type: ANOMALY_TYPES.INCONSISTENT_FORMAT,
+          message: `Unknown split type: UNEQUAL, assuming EXACT`,
+          action: ANOMALY_ACTIONS.IMPORT_WITH_CORRECTION,
+        });
+      } else if (
+        splitType &&
+        !Object.values(SPLIT_TYPES).includes(splitType)
       ) {
         anomaliesForRow.push({
           type: ANOMALY_TYPES.INCONSISTENT_FORMAT,
@@ -345,7 +375,7 @@ class ImportService {
             amount,
             currency,
             amountInINR,
-            paidBy: payer.userId,
+            paidBy: payer ? payer.userId : null,
             expenseDate: new Date(row.Date),
             splitType,
             category: row.Category || null,
